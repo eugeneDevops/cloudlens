@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/Migrations/
+**/*.Designer.cs
+**/Protos/**/*.g.cs
+**/*.lock

@@ -1,0 +1,12 @@
+---
+description: Применять при работе с Kafka, producer, consumer, outbox, идемпотентностью обработки сообщений и DLQ.
+alwaysApply: false
+---
+
+- Публикация только через outbox, никогда напрямую из handler'а.
+- Outbox-publisher: батч 50, `SELECT ... FOR UPDATE SKIP LOCKED`.
+- Consumer: `EnableAutoCommit=false`, `StoreOffset` после успешной обработки.
+- Идемпотентность по `messageId` из заголовка + таблица `processed_messages`.
+- После 3 неудач — DLQ-топик с заголовками об ошибке.
+- Топики именуются `<context>.<event>.v<N>`.
+- Confluent.Kafka напрямую. MassTransit не добавлять.
