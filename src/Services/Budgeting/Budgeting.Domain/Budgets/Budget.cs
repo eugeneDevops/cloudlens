@@ -30,6 +30,7 @@ public sealed class Budget : AggregateRoot<Guid>
     {
     }
 
+    // Closed periods still accept charges: late CUR corrections. See ADR-0002.
     public Result ApplyCharge(ChargeKey key, Money amount)
     {
         ArgumentNullException.ThrowIfNull(key);

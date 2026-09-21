@@ -4,6 +4,7 @@ namespace Budgeting.Domain;
 
 public sealed class BudgetPeriod : Entity<Guid>
 {
+    // 5 pp, not 2 or 10: billing noise is < 2%; thresholds sit 20 pp apart. See ADR-0002.
     private const int HysteresisPercentagePoints = 5;
 
     private readonly List<AppliedCharge> _appliedCharges = [];
@@ -74,6 +75,7 @@ public sealed class BudgetPeriod : Entity<Guid>
 
     internal void Close() => IsClosed = true;
 
+    // The aggregate root must call this after a limit change: utilization moved without a charge.
     internal void EvaluateThresholds(Guid budgetId, Action<IDomainEvent> raise)
     {
         decimal utilization = UtilizationPercent();

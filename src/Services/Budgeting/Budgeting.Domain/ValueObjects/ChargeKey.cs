@@ -21,7 +21,7 @@ public sealed record ChargeKey
             return Result.Failure<ChargeKey>(ChargeKeyErrors.EmptyService);
         }
 
-        // Normalization is required: "AmazonEC2" and "amazonec2" must not become two grains.
+        // Normalization is required: "AmazonEC2" and "amazonec2" would otherwise become two grains and double-count.
         return Result.Success(new ChargeKey(usageDate, service.Trim().ToLowerInvariant()));
     }
 }
