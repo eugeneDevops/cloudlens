@@ -8,3 +8,6 @@ out/
 *.user
 appsettings.Development.json
 .env
+.vscode/
+.claude/settings.local.json
+CLAUDE.local.md
