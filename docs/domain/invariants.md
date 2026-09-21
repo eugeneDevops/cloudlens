@@ -12,13 +12,13 @@
 
 | # | Формулировка | Где проверяется | Тест | Что сломается без него |
 |---|---|---|---|---|
-| 1 | **Учтено ровно раз.** Повтор зерна `ChargeKey` с той же суммой не меняет `Spent` и не поднимает событий | `BudgetPeriod.ApplyCharge` — поиск по ключу, ранний выход при равной сумме | частично: `Should_LeaveSpentUnchanged_When_SameChargeKeyAppliedTwiceWithSameAmount` проверяет `Spent`; то, что при повторе нет событий, не проверяется | Повторная доставка CUR удваивает расход и поднимает ложные алерты |
-| 2 | **Исправление = дельта.** Повтор зерна с другой суммой сдвигает `Spent` на разницу и заменяет сумму зерна | `BudgetPeriod.ApplyCharge` — `delta`, `ReplaceAmount` | частично: `Should_IncreaseSpentByDelta_…`, `Should_DecreaseSpentByDelta_…` проверяют `Spent`; что `AppliedCharge.Amount` заменена, не проверяется | Коррекция ложится поверх старой суммы, а не вместо неё |
+| 1 | **Учтено ровно раз.** Повтор зерна `ChargeKey` с той же суммой не меняет `Spent` и не поднимает событий | `BudgetPeriod.ApplyCharge` — поиск по ключу, ранний выход при равной сумме | да: `Should_LeaveSpentUnchanged_When_SameChargeKeyAppliedTwiceWithSameAmount` (`Spent`), `Should_NotRaiseEvents_When_SameChargeKeyAppliedTwiceWithSameAmount` | Повторная доставка CUR удваивает расход и поднимает ложные алерты |
+| 2 | **Исправление = дельта.** Повтор зерна с другой суммой сдвигает `Spent` на разницу и заменяет сумму зерна | `BudgetPeriod.ApplyCharge` — `delta`, `ReplaceAmount` | да: `Should_IncreaseSpentByDelta_…`, `Should_DecreaseSpentByDelta_…` (`Spent`), `Should_ReplaceAppliedChargeAmount_When_ChargeIsCorrected` | Коррекция ложится поверх старой суммы, а не вместо неё |
 | 3 | **Порог срабатывает один раз.** Порог переходит `Clear → Latched` при утилизации ≥ P и поднимает ровно одно `ThresholdAlertRaised`; пока он `Latched`, событий нет | `BudgetPeriod.EvaluateThresholds` | да: `Should_RaiseSingleThresholdAlert_…`, `Should_NotRaiseEvents_When_SpendIncreasesFurther…`, `Should_TreatExactEightyPercentAsThresholdCrossing` (граница ≥). По отдельности проверен только порог 80; 50 и 100 — только в `Should_RaiseThreeThresholdAlerts…` | Алерт на каждое начисление выше порога |
 | 4 | **Гистерезис.** Порог перезаряжается (`Latched → Clear`, `ThresholdReset`), только когда утилизация ≤ P − 5 п.п. | `BudgetPeriod.EvaluateThresholds`, `HysteresisPercentagePoints` | да: `Should_KeepEightyPercentLatched_When_UtilizationDropsToSeventyNinePercent` (держит), `Should_ResetThreshold_When_UtilizationDropsToSeventyFivePercent` (граница ≤ P − 5), `Should_ResetThreshold_When_UtilizationDropsToSeventyFourPercent` | Колебание суммы у порога поднимает серию алертов и сбросов |
 | 5 | **Лимит закрытого периода заморожен.** `ChangeLimit` на закрытом периоде → `ClosedPeriodLimit` | `Budget.ChangeLimit` | да: `Should_ReturnFailure_When_ChangingLimitOnClosedPeriod` (`BudgetErrors.ClosedPeriodLimit`) | Меняется история: отчёт по закрытому месяцу перестаёт совпадать с `PeriodClosed` |
 | 6 | **Одна валюта.** `Limit`, `Spent` и все `AppliedCharge` периода — в одной валюте | `BudgetPeriod.ApplyCharge` (начисление), `Budget.ChangeLimit` (лимит) | да: `Should_ReturnFailure_When_ChargeCurrencyDiffersFromLimit` (`BudgetErrors.CurrencyMismatch`), `Should_LeaveSpentUnchanged_When_ChargeCurrencyDiffersFromLimit`, `Should_ReturnCurrencyMismatch_When_ChangingLimitWithDifferentCurrency` | `UtilizationPercent` делит числа разных валют; после смены валюты лимита все последующие начисления отклоняются |
-| 7 | **Лимит строго положителен** | `Budget.Create`, `Budget.ChangeLimit` | частично: `Should_ReturnFailure_When_CreatedWithNonPositiveLimit` покрывает `Create`; `ChangeLimit(0)` и `ChangeLimit(-1)` не проверены | `DivideByZeroException` в `UtilizationPercent`; при отрицательном лимите утилизация меняет знак |
+| 7 | **Лимит строго положителен** | `Budget.Create`, `Budget.ChangeLimit` | да: `Should_ReturnFailure_When_CreatedWithNonPositiveLimit`, `Should_ReturnFailure_When_ChangingLimitToNonPositiveAmount` | `DivideByZeroException` в `UtilizationPercent`; при отрицательном лимите утилизация меняет знак |
 | 8 | **Дата потребления внутри периода** `[Start, End)` | `Budget.ApplyCharge` → `PeriodRange.Contains` | да: четыре граничных теста в `BudgetAppliedChargeTests`; отказы проверяют `BudgetErrors.UsageDateOutsidePeriod` | Начисление за чужой месяц попадает в этот бюджет |
 | 9 | **Период непустой:** `End > Start` | `PeriodRange.Create` | да: `Should_ReturnFailure_When_EndIsNotAfterStart` (`End == Start` и `End < Start`) | Бюджет, который отклоняет любое начисление |
 | 10 | **Ключ зерна нормализован.** `Service` непустой, без пробелов по краям, в нижнем регистре | `ChargeKey.Create` | да: `Should_ReturnEmptyService_When_ServiceIsWhitespace`, `Should_BeEqual_When_ServicesDifferByPaddingAndCase` | `AmazonEC2` и `amazonec2` становятся двумя зёрнами → двойной учёт (ломает № 1) |
@@ -31,17 +31,12 @@
 
 ## Инварианты без тестов
 
-Проверки нет вообще:
-
-- **13** — начальный набор порогов.
-
-Тест есть, но пропускает регрессию:
-
-- **7** — `ChangeLimit` с нулём и отрицательным значением.
-- **1** — повтор с той же суммой не поднимает событий.
-- **2** — `AppliedCharge.Amount` заменена на новую сумму.
-- **14** — порядок `ThresholdReset` при одновременном сбросе нескольких порогов.
-- **15** — понижение лимита, поднимающее утилизацию выше порога.
+Покрытие сознательно неполное. № 13 — набор порогов задан константой
+в конструкторе. № 14 — порядок сбросов использует тот же `OrderBy`,
+что и порядок алертов, который проверен. № 15 — понижение лимита
+не встречается в текущем ingestion.
+Вернуться к ним, если пороги станут конфигурируемыми или появится
+сценарий понижения лимита.
 
 ## Где состояние меняется в обход проверок
 

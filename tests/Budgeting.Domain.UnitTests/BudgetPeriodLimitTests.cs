@@ -16,6 +16,18 @@ public class BudgetPeriodLimitTests
         result.Error.Should().Be(BudgetErrors.NonPositiveLimit);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Should_ReturnFailure_When_ChangingLimitToNonPositiveAmount(long amountMinor)
+    {
+        Budget budget = Budgets.OpenJanuary();
+
+        Result result = budget.ChangeLimit(Money.Usd(amountMinor));
+
+        result.Error.Should().Be(BudgetErrors.NonPositiveLimit);
+    }
+
     [Fact]
     public void Should_Succeed_When_CreatedWithValidLimit()
     {

@@ -19,6 +19,19 @@ public class BudgetAppliedChargeTests
     }
 
     [Fact]
+    public void Should_NotRaiseEvents_When_SameChargeKeyAppliedTwiceWithSameAmount()
+    {
+        Budget budget = Budgets.OpenJanuary();
+        ChargeKey key = Budgets.Ec2(10);
+        budget.ApplyCharge(key, Money.Usd(400_000));
+        budget.ClearDomainEvents();
+
+        budget.ApplyCharge(key, Money.Usd(400_000));
+
+        budget.DomainEvents.Should().BeEmpty();
+    }
+
+    [Fact]
     public void Should_StoreTwoCharges_When_SameServiceHasDifferentUsageDates()
     {
         Budget budget = Budgets.OpenJanuary();
@@ -81,6 +94,20 @@ public class BudgetAppliedChargeTests
         budget.ApplyCharge(ec2, Money.Usd(70_000));
 
         Budgets.Period(budget).Spent.Should().Be(Money.Usd(120_000));
+    }
+
+    [Fact]
+    public void Should_ReplaceAppliedChargeAmount_When_ChargeIsCorrected()
+    {
+        Budget budget = Budgets.OpenJanuary();
+        ChargeKey ec2 = Budgets.Ec2(10);
+        budget.ApplyCharge(ec2, Money.Usd(100_000));
+        budget.ApplyCharge(Budgets.S3(10), Money.Usd(50_000));
+
+        budget.ApplyCharge(ec2, Money.Usd(130_000));
+
+        Budgets.Period(budget).AppliedCharges.Single(charge => charge.Key == ec2)
+            .Amount.Should().Be(Money.Usd(130_000));
     }
 
     [Fact]
