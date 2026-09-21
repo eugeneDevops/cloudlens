@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Services\Budgeting\Budgeting.Domain\Budgeting.Domain.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\SharedKernel\SharedKernel.csproj" />
   </ItemGroup>
 
 </Project>
