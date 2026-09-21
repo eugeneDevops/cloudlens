@@ -28,6 +28,7 @@
 | 14 | **События порогов идут по возрастанию P** | `EvaluateThresholds` — `OrderBy(Percent)` | частично: проверены алерты (`Should_RaiseThreeThresholdAlertsInAscendingOrder_…`); порядок сбросов не проверен | Потребитель видит «100%» раньше «50%» |
 | 15 | **Смена лимита пересчитывает пороги** | `Budget.ChangeLimit` → `Period.EvaluateThresholds` | частично: проверено повышение лимита (держит 80% и сбрасывает 80%); понижение, пересекающее порог вверх, не проверено | После повышения лимита порог остаётся взведённым навсегда; после понижения алерта нет |
 | 16 | **Каждое событие несёт `BudgetId` и уникальный `EventId`** | Конструкторы событий, `DomainEvent` | да: `Should_AssignDistinctEventIds_…` и проверки `BudgetId` в тестах событий | Потребитель не может дедуплицировать события и понять, к какому бюджету они относятся |
+| 17 | **Бюджет принадлежит ровно одному валидному аккаунту.** `AccountId` — ровно 12 цифр; у бюджета одно такое поле | `AccountId.Create`, `Budget.Create` | да: `Should_ReturnInvalid_When_ValueIsEmpty`, `Should_ReturnInvalid_When_ValueHasElevenDigits`, `Should_ReturnInvalid_When_ValueContainsLetters` (`AccountIdErrors.Invalid`), `Should_ReturnAccountId_When_ValueIsTwelveDigits`, `Should_StoreAccountId_When_Created` | Свёртке по `account_id` не к чему привязать зерно; в бюджет попадают начисления другого аккаунта |
 
 ## Инварианты без тестов
 

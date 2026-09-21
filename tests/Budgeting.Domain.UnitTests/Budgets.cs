@@ -11,8 +11,10 @@ internal static class Budgets
 
     public static readonly Money TenThousandUsd = Money.Usd(1_000_000);
 
+    public static readonly AccountId Account = AccountId.Create("123456789012").Value;
+
     public static Budget OpenJanuary(Money? limit = null) =>
-        Budget.Create(limit ?? TenThousandUsd, January).Value;
+        Budget.Create(Account, limit ?? TenThousandUsd, January).Value;
 
     public static BudgetPeriod Period(Budget budget) => budget.Period;
 

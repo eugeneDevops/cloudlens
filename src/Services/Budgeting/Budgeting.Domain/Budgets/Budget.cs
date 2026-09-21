@@ -4,10 +4,13 @@ namespace Budgeting.Domain;
 
 public sealed class Budget : AggregateRoot<Guid>
 {
+    public AccountId AccountId { get; private set; } = null!;
+
     public BudgetPeriod Period { get; private set; } = null!;
 
-    public static Result<Budget> Create(Money limit, PeriodRange period)
+    public static Result<Budget> Create(AccountId accountId, Money limit, PeriodRange period)
     {
+        ArgumentNullException.ThrowIfNull(accountId);
         ArgumentNullException.ThrowIfNull(limit);
         ArgumentNullException.ThrowIfNull(period);
 
@@ -16,12 +19,13 @@ public sealed class Budget : AggregateRoot<Guid>
             return Result.Failure<Budget>(BudgetErrors.NonPositiveLimit);
         }
 
-        return Result.Success(new Budget(Guid.NewGuid(), limit, period));
+        return Result.Success(new Budget(Guid.NewGuid(), accountId, limit, period));
     }
 
-    private Budget(Guid id, Money limit, PeriodRange period)
+    private Budget(Guid id, AccountId accountId, Money limit, PeriodRange period)
         : base(id)
     {
+        AccountId = accountId;
         Period = BudgetPeriod.Open(limit, period);
     }
 

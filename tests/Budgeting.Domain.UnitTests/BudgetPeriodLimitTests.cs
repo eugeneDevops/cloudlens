@@ -11,7 +11,7 @@ public class BudgetPeriodLimitTests
     [InlineData(-1)]
     public void Should_ReturnFailure_When_CreatedWithNonPositiveLimit(long amountMinor)
     {
-        Result<Budget> result = Budget.Create(Money.Usd(amountMinor), Budgets.January);
+        Result<Budget> result = Budget.Create(Budgets.Account, Money.Usd(amountMinor), Budgets.January);
 
         result.Error.Should().Be(BudgetErrors.NonPositiveLimit);
     }
@@ -31,9 +31,19 @@ public class BudgetPeriodLimitTests
     [Fact]
     public void Should_Succeed_When_CreatedWithValidLimit()
     {
-        Result<Budget> result = Budget.Create(Money.Usd(1_000_000), Budgets.January);
+        Result<Budget> result = Budget.Create(Budgets.Account, Money.Usd(1_000_000), Budgets.January);
 
         result.IsSuccess.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Should_StoreAccountId_When_Created()
+    {
+        AccountId accountId = AccountId.Create("999888777666").Value;
+
+        Budget budget = Budget.Create(accountId, Budgets.TenThousandUsd, Budgets.January).Value;
+
+        budget.AccountId.Should().Be(accountId);
     }
 
     [Fact]
@@ -41,7 +51,7 @@ public class BudgetPeriodLimitTests
     {
         Money limit = Money.Eur(1_000_000);
 
-        Budget budget = Budget.Create(limit, Budgets.January).Value;
+        Budget budget = Budget.Create(Budgets.Account, limit, Budgets.January).Value;
 
         Budgets.Period(budget).Spent.Should().Be(Money.Eur(0));
     }
