@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "BillingGenerator": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--accounts 3 --days 90 --seed 42 --out out/billing.csv",
+      "workingDirectory": "../.."
+    },
+    "BillingGenerator (all modes)": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--accounts 3 --days 90 --seed 42 --out out/billing.csv --late-arrival --corrections --duplicate-batch",
+      "workingDirectory": "../.."
+    }
+  }
+}
