@@ -175,4 +175,24 @@ public class BudgetAppliedChargeTests
 
         result.IsSuccess.Should().BeTrue();
     }
+
+    [Fact]
+    public void Should_KeepSpentEqualToSumOfAppliedCharges_When_ChargesAreAppliedAndCorrected()
+    {
+        Budget budget = Budgets.OpenJanuary();
+        ChargeKey ec2 = Budgets.Ec2(10);
+        ChargeKey s3 = Budgets.S3(10);
+
+        budget.ApplyCharge(ec2, Money.Usd(100_000));
+        budget.ApplyCharge(s3, Money.Usd(50_000));
+        budget.ApplyCharge(ec2, Money.Usd(130_000));
+        budget.ApplyCharge(s3, Money.Usd(20_000));
+
+        BudgetPeriod period = Budgets.Period(budget);
+        Money total = period.AppliedCharges
+            .Select(charge => charge.Amount)
+            .Aggregate((left, right) => left.Add(right).Value);
+
+        period.Spent.Should().Be(total);
+    }
 }

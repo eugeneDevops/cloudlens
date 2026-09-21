@@ -26,5 +26,4 @@ alwaysApply: false
 - Валидация в статической фабрике, не в конструкторе.
 - `Money` с другой валютой -> `Result.Failure`, не исключение.
 
-<!-- После дня 1 раскомментируй — эталон сильнее любого описания: -->
-<!-- Эталонный агрегат: @src/Services/Budgeting/Budgeting.Domain/Budgets/Budget.cs -->
+Эталонный агрегат: @src/Services/Budgeting/Budgeting.Domain/Budgets/Budget.cs
